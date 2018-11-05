@@ -5,7 +5,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 
-# TODO: Clean up this code, probably delete all the old stuff too
 # TODO: There's some off-by-one error in here that's obvious in the graph
 
 now = datetime.datetime.now()
