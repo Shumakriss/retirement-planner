@@ -1,5 +1,7 @@
 import json
 import os
+from money import *
+import constants
 ## Feature Requests
 # Mortgage calculator (PMI, tax, HOA, insurance, equity/interest curve)
 # Sweep on loan lengths
@@ -22,59 +24,59 @@ starting_amount = 9896  # Wow. Just wow. https://thecollegeinvestor.com/14611/av
 age_death_min = 70
 age_death_max = 100
 current_age = 32
-max_monthly_payment = 2500
+max_monthly_payment = 2000
 house_value_min = 200000
 house_value_max = 1000000
 house_value_incr = 50000
 down_payment_incr = 25000
-retirement_salary = 45000
+retirement_salary = 27500
 inflation_rate = 3.22 / 100
-rent_before_purchase = 2200
-loan_terms = [7, 15, 30]
+rent_before_purchase = 1500
+loan_term = 30
 social_security_age = 66
+#
+# def compound_growth(principal, rate, years, annual_contribution):
+#     p = principal
+#     r = rate
+#     y = years
+#     c = annual_contribution
+#
+#     if r == 0:
+#         r = 0.0000001
+#
+#     amount = p * ((1 + r) ** y) + c * (((1 + r) ** (y + 1) - (1 + r)) / r)
+#     return amount
+#
+#
+# def print_currency(currency):
+#     print('${:,.2f}'.format(currency))
+#
+#
+# def amount_needed(years, inflation_rate, salary):
+#     # Compute how much money is needed
+#     total = 0
+#     for year in range(years):
+#         total = total + salary * (1+inflation_rate) ** year
+#     return total
 
-def compound_growth(principal, rate, years, annual_contribution):
-    p = principal
-    r = rate
-    y = years
-    c = annual_contribution
-
-    if r == 0:
-        r = 0.0000001
-
-    amount = p * ((1 + r) ** y) + c * (((1 + r) ** (y + 1) - (1 + r)) / r)
-    return amount
-
-
-def print_currency(currency):
-    print('${:,.2f}'.format(currency))
-
-
-def amount_needed(years, inflation_rate, salary):
-    # Compute how much money is needed
-    total = 0
-    for year in range(years):
-        total = total + salary * (1+inflation_rate) ** year
-    return total
-
-
-def can_survive(principal, years):
-    # Assume house will be bought?
-    # Compute compound interest with negative contributions
-    # Interest rate being (market rate - inflation)?
-    # Use interest rate in retirement?
-    # Is the formula similar to stock expenses?
-    # This also depends on whether or not rent is being paid, assume a house will be bought?
-    # Can't use compound_growth because it's been simplified to compound contributions too
-    # year0 = principal - retirement_salary
-    # year1 = principal + principal * (1+retirement_rate) - retirement_salary * (1+inflation_rate)
-    # year3 = principal + principal * (1+retirement_rate) ** 2 - retirement_salary * (1+inflation_rate) ** 2
-    required_balance = amount_needed(years, retirement_rate, retirement_salary)
-    return principal < required_balance
-    # balance = principal
-    # for year in range(years):
-    #     balance = balance * (1+retirement_rate) - retirement_salary * (1+inflation_rate) ** year
-    # return balance > 0
+#
+# def can_survive(principal, years):
+#     # Assume house will be bought?
+#     # Compute compound interest with negative contributions
+#     # Interest rate being (market rate - inflation)?
+#     # Use interest rate in retirement?
+#     # Is the formula similar to stock expenses?
+#     # This also depends on whether or not rent is being paid, assume a house will be bought?
+#     # Can't use compound_growth because it's been simplified to compound contributions too
+#     # year0 = principal - retirement_salary
+#     # year1 = principal + principal * (1+retirement_rate) - retirement_salary * (1+inflation_rate)
+#     # year3 = principal + principal * (1+retirement_rate) ** 2 - retirement_salary * (1+inflation_rate) ** 2
+#     required_balance = amount_needed(years, retirement_rate, retirement_salary)
+#     return principal < required_balance
+#     # balance = principal
+#     # for year in range(years):
+#     #     balance = balance * (1+retirement_rate) - retirement_salary * (1+inflation_rate) ** year
+#     # return balance > 0
 
 
 # Retirement Age
@@ -164,7 +166,7 @@ def get_potential_plans():
                                 'house_value': house_value,
                                 'balance_at_retirement': balance_at_retirement}
 
-                        if can_survive(balance_at_retirement, years_to_live):
+                        if can_survive(balance_at_retirement, years_to_live, retirement_rate, retirement_salary):
                                 # and retirement_age < retirement_age_min):
                             # This doesn't really find the min but does eliminate scenarios that are definitely not
                             # retirement_age_min = retirement_age
