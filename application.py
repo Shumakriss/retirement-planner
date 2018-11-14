@@ -105,6 +105,8 @@ for initial_years_idx, initial_year in enumerate(initial_years):
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+application = app.server
+
 layout = go.Layout(
     title='Retirement Balance over time',
     showlegend=True,
@@ -168,4 +170,4 @@ def update_output_div(age_retirement, age, age_death, savings_retirement, market
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=80)
+    application.run(debug=True, port=8080)
