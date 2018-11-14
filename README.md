@@ -14,6 +14,7 @@ Want to help?
 * Rewrite or improve the simulators
 * Incorporate this multi-parameter sweep into a visualization
 * Get some more realistic defaults
+* Add mortgage calculation
 * It might be early for this but any way to incorporate details like tax savings or changes, enabling/disabling house
 purchases, car purchases, or social security would be useful
 * Allow users to plot multiple scenarios

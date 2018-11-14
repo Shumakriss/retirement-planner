@@ -5,32 +5,32 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 
-# TODO: There's some off-by-one error in here that's obvious in the graph
+# TODO: Is there an off by one error? The graph doesn't peak at age_retirement but age_retirement-1
 
 now = datetime.datetime.now()
 current_year = now.year
 defaults = {
     'age_retirement': 65,
     'age': 32,
-    'age_death': 115,
+    'age_death': 80,
     'savings_retirement': 10000,
     'market_rate': (7 / 100),
     'rate_retirement': (3 / 100),
     'rate_appreciation': (3.7 / 100),
     'rate_inflation': (3.22 / 100),
-    'rate_contribution': (5 / 100),
-    'contribution_monthly': 1000,
+    # 'rate_contribution': (5 / 100),
+    'contribution_monthly': 200,
     'rent': 1500,
-    'salary_retirement': 27500,
+    'salary_retirement': 20000,
     'down_payment': 14000,
     'house_value': 250000,
     'loan_term': 30,
     'age_purchase': 35,
     'purchase_type': "mortgage",
-    'age_social_security': 62,
+    'age_social_security': 65,
     'monthly_contribution_social_security': 3698,
-    'house': True,
-    'social_security': True
+    # 'house': True,
+    # 'social_security': True
 }
 
 
@@ -42,11 +42,12 @@ def recalculate(age_retirement=defaults['age_retirement'],
                 rate_retirement=defaults['rate_retirement'],
                 rate_appreciation=defaults['rate_appreciation'],
                 rate_inflation=defaults['rate_inflation'],
+                # rate_contribution=defaults['rate_contribution'],
                 contribution_monthly=defaults['contribution_monthly'],
                 rent=defaults['rent'],
                 salary_retirement=defaults['salary_retirement'],
                 down_payment=defaults['down_payment'],
-                house_value=defaults['house_value'],
+                house_value=defaults['house_value'],    # This doesn't currently mean much since mortage=rent is fixed
                 loan_term=defaults['loan_term'],
                 age_purchase=defaults['age_purchase'],
                 purchase_type=defaults['purchase_type'],
@@ -130,10 +131,12 @@ graph = dcc.Graph(
 
 # Trying to keep this less verbose but there might be a better way since this requires formatting
 children = [graph]
+inputs = []
 for key, value in defaults.items():
     label = key.replace('_', ' ')
     children.append(html.Label(label))
     input_id = key.replace('_', '-')
+    inputs.append(Input(component_id=input_id, component_property='value'))
     if type(value) == int:
         children.append(dcc.Input(id=input_id, value=value, type='number'))
     else:
@@ -145,15 +148,21 @@ app.layout = html.Div(children, style={'columnCount': 2})
 # This callback will cause the whole graph to redraw since technically it has new data
 @app.callback(
     Output(component_id='retirement-bal-vs-time', component_property='figure'),
-    [Input(component_id='age-retirement', component_property='value')],
+    inputs,
     [State('retirement-bal-vs-time', 'figure')]
 )
-def update_output_div(input_value, figure):
-    new_ages, new_balances = recalculate(input_value)
+def update_output_div(age_retirement, age, age_death, savings_retirement, market_rate, rate_retirement,
+                      rate_appreciation, rate_inflation, contribution_monthly, rent, salary_retirement, down_payment,
+                      house_value, loan_term, age_purchase, purchase_type, age_social_security,
+                      monthly_contribution_social_security, figure):
+    new_ages, new_balances = recalculate(age_retirement, age, age_death, savings_retirement, market_rate,
+                                         rate_retirement,  rate_appreciation, rate_inflation, contribution_monthly,
+                                         rent, salary_retirement, down_payment,  house_value, loan_term, age_purchase,
+                                         purchase_type, age_social_security, monthly_contribution_social_security)
     new_years = [x + 2018 for x in range(len(new_ages))]
     new_x = []
     for index, new_year in enumerate(new_years):
-        new_x.append(f"{new_year}\nAge {new_ages[initial_years_idx]}")
+        new_x.append(f"{new_year}\nAge {new_ages[index]}")
     figure['data'] = [{'x': new_ages, 'y': new_balances, 'type': 'scatter'}]
     return figure
 
