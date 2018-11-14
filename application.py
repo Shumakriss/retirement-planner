@@ -168,4 +168,4 @@ def update_output_div(age_retirement, age, age_death, savings_retirement, market
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8080)
