@@ -132,7 +132,8 @@ graph = dcc.Graph(
     )
 
 # Trying to keep this less verbose but there might be a better way since this requires formatting
-children = [graph]
+# children = [graph]
+children = []
 inputs = []
 for key, value in defaults.items():
     label = key.replace('_', ' ')
@@ -144,7 +145,11 @@ for key, value in defaults.items():
     else:
         children.append(dcc.Input(id=input_id, value=value, type='text'))
 
-app.layout = html.Div(children, style={'columnCount': 2})
+# app.layout = html.Div(children, style={'columnCount': 2})
+app.layout = html.Div(children=[
+    html.Div([graph], style={'width': '100%'}),
+    html.Div(children, style={'columnCount': 3})]
+)
 
 
 # This callback will cause the whole graph to redraw since technically it has new data
