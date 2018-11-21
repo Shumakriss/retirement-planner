@@ -6,6 +6,8 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 
 # TODO: Is there an off by one error? The graph doesn't peak at age_retirement but age_retirement-1
+# TODO: "profile selector" choose average values based on your demographic
+# TODO: "consertiveness/aggressiveness selector"
 
 now = datetime.datetime.now()
 current_year = now.year
@@ -13,11 +15,11 @@ defaults = {
     'age_retirement': 65,
     'age': 32,
     'age_death': 80,
-    'savings_retirement': 10000,
-    'market_rate': (7 / 100),
-    'rate_retirement': (3 / 100),
-    'rate_appreciation': (3.7 / 100),
-    'rate_inflation': (3.22 / 100),
+    'savings_retirement': 10000,    # TODO: Graph doesn't start here (off by one year)
+    'market_rate': 0.07,
+    'rate_retirement': 0.03,
+    'rate_appreciation': 0.037,
+    'rate_inflation': 0.0322,
     # 'rate_contribution': (5 / 100),
     'contribution_monthly': 200,
     'rent': 1500,
@@ -61,6 +63,7 @@ def recalculate(age_retirement=defaults['age_retirement'],
     # TODO: Make home purchase and social security optional
     # TODO: Factor in taxes based on account type
     # TODO: Think through contribution/compounding periods and adjust accordingly
+    # TODO: Plot against time: retirement salary, home value, equity, interest paid, rent rate inflation
     for age in ages:
         years.append(years[-1] + 1)
         salary_retirement = salary_retirement * (1 + rate_inflation)
@@ -74,7 +77,7 @@ def recalculate(age_retirement=defaults['age_retirement'],
         if age_retirement > age > age_purchase + loan_term:
             savings_retirement = savings_retirement + 12 * rent
         if age < age_retirement:
-            savings_retirement = savings_retirement * (1 + market_rate)
+            savings_retirement = savings_retirement * (1.0 + market_rate)    # TODO: Why is this a string?
             savings_retirement = savings_retirement + 12 * contribution_monthly
         else:
             savings_retirement = savings_retirement * (1 + rate_retirement)
@@ -108,13 +111,15 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 application = app.server
 
 layout = go.Layout(
-    title='Retirement Balance over time',
-    showlegend=True,
-    legend=go.layout.Legend(
-        x=0,
-        y=1.0
-    ),
-    margin=go.layout.Margin(l=40, r=0, t=40, b=30)
+    title='Retirement Balance Over Time',
+    showlegend=False,
+    # showlegend=True,
+    # legend=go.layout.Legend(
+    #     x=0,
+    #     y=1.0,
+    #     # showlegend=False
+    # ),
+    margin=go.layout.Margin(l=40, r=0, t=40, b=30),
 )
 
 graph = dcc.Graph(
@@ -137,13 +142,16 @@ children = []
 inputs = []
 for key, value in defaults.items():
     label = key.replace('_', ' ')
-    children.append(html.Label(label))
+    div_children = [html.Label(label)]
     input_id = key.replace('_', '-')
     inputs.append(Input(component_id=input_id, component_property='value'))
-    if type(value) == int:
-        children.append(dcc.Input(id=input_id, value=value, type='number'))
+    if type(value) == str:
+        div_children.append(dcc.Input(id=input_id, value=value, type='text'))
     else:
-        children.append(dcc.Input(id=input_id, value=value, type='text'))
+        div_children.append(dcc.Input(id=input_id, value=value, type='number'))
+    div_children.append(html.Abbr("\uFE56", title="Hello, I am hover-enabled helpful information."))
+    div = html.Div(children=div_children)
+    children.append(div)
 
 # app.layout = html.Div(children, style={'columnCount': 2})
 app.layout = html.Div(children=[
@@ -171,6 +179,36 @@ def update_output_div(age_retirement, age, age_death, savings_retirement, market
     for index, new_year in enumerate(new_years):
         new_x.append(f"{new_year}\nAge {new_ages[index]}")
     figure['data'] = [{'x': new_ages, 'y': new_balances, 'type': 'scatter'}]
+    new_layout = go.Layout(
+        title='Retirement Balance Over Time',
+        showlegend=False,
+        margin=go.layout.Margin(l=40, r=0, t=40, b=30),
+        # annotations=[
+        #     dict(
+        #         x=2,
+        #         y=5,
+        #         xref='x',
+        #         yref='y',
+        #         text='dict Text',
+        #         showarrow=True,
+        #         arrowhead=7,
+        #         ax=0,
+        #         ay=-40
+        #     ),
+        #     dict(
+        #         x=4,
+        #         y=4,
+        #         xref='x',
+        #         yref='y',
+        #         text='dict Text 2',
+        #         showarrow=True,
+        #         arrowhead=7,
+        #         ax=0,
+        #         ay=-40
+        #     )
+        # ]
+    )
+    figure['layout'] = new_layout
     return figure
 
 
