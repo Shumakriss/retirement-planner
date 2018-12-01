@@ -18,7 +18,7 @@ class MyInput:
         self.user_input = dcc.Input(id=input_id, value=value, type=input_type, step=step)
         self.callback_input = Input(component_id=input_id, component_property='value')
         self.tooltip = html.Abbr("\u003F", title=tooltip_text)
-        self.container = html.Div(children=[self.label, self.user_input, self.tooltip])
+        self.container = html.Div(children=[self.label, self.user_input, self.tooltip], style={'columnCount': 3})
 
 
 now = datetime.datetime.now()
@@ -94,11 +94,11 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 application = app.server
-
+margin = 80
 layout = go.Layout(
     title='Retirement Balance Over Time',
     showlegend=False,
-    margin=go.layout.Margin(l=40, r=0, t=40, b=30),
+    margin=go.layout.Margin(l=margin, r=margin, t=margin, b=margin),
     xaxis=dict(title='Age'),
     yaxis=dict(title='USD')
 )
@@ -120,6 +120,8 @@ graph = dcc.Graph(
 
 app.layout = html.Div(children=[
     html.Div([graph], style={'width': '100%'}),
+    html.Hr(),
+    html.H3("Settings", style={'text-align':'center'}),
     html.Div(input_containers, style={'columnCount': 2})]
 )
 
